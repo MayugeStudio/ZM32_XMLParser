@@ -48,6 +48,9 @@ class document final
 public:
 	document() = default;
 	~document() = default;
+
+private:
+	tag root;
 };
 
 
