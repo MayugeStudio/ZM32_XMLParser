@@ -1,4 +1,4 @@
-#ifndef ZM32XML_HPP
+﻿#ifndef ZM32XML_HPP
 #define ZM32XML_HPP
 
 
@@ -21,16 +21,20 @@
 
 namespace zm32xml {
 
+class document;
+class tag;
+class attribute;
 
-class attribute final
+
+/// @brief	 XML文書全体を扱うクラス
+/// @details ルートのtagを持つ
+/// 
+/// @date    2025/07/24 メンバを実装 (D: kawahara, N: shiba)
+class document final
 {
 public:
-	attribute() = default;
-	~attribute() = default;
-
-private:
-	std::string m_name;
-	std::string m_value;
+	document() = default;
+	~document() = default;
 };
 
 
@@ -44,6 +48,18 @@ private:
 	std::string m_name;
 	std::vector<attribute> m_attributes;
 	std::vector<tag> m_children;
+};
+
+
+class attribute final
+{
+public:
+	attribute() = default;
+	~attribute() = default;
+
+private:
+	std::string m_name;
+	std::string m_value;
 };
 
 
