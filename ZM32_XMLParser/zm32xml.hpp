@@ -22,9 +22,11 @@
 namespace zm32xml {
 
 
-class attribute
+class attribute final
 {
 public:
+	attribute() = default;
+	~attribute() = default;
 
 private:
 	std::string m_name;
