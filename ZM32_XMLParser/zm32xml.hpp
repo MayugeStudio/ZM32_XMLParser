@@ -1,14 +1,14 @@
-﻿///
-/// @file		zm32xml.hpp
-/// @brief		XMLパーサ
-/// @details	ZM32 ペアプログラミング専科での制作物
-/// 
-/// @author		Kawahara, Shiba
-/// 
-/// @date		2024/07/24
-/// 
-/// @version	0.0.1
-///
+﻿/**
+ *	@file		zm32xml.hpp
+ *	@brief		XMLパーサ
+ *	@details	ZM32 ペアプログラミング専科での制作物
+ *	
+ *	@author		Kawahara, Shiba
+ *	
+ *	@date		2024/07/24
+ *	
+ *	@version	0.0.1
+ */
 
 
 // Parsing                         :
@@ -40,10 +40,12 @@ class tag;
 class attribute;
 
 
-/// @brief	 XML文書全体を扱うクラス
-/// @details ルートのtagを持つ
-/// 
-/// @date    2025/07/24 メンバを実装 (D: kawahara, N: shiba)
+/**
+ *	@brief	 XML文書全体を扱うクラス
+ *	@details ルートのtagを持つ
+ *	
+ *	@date    2025/07/24 メンバを実装 (D: kawahara, N: shiba)
+ */ 
 class document final
 {
 public:
@@ -55,10 +57,12 @@ private:
 };
 
 
-/// @brief	 XMLのタグを扱うクラス
-/// @details 名前、属性、子タグをメンバに持つ
-/// 
-/// @date    2025/07/24 メンバを実装 (D: kawahara, N: shiba)
+/**
+ *  @brief	 XMLのタグを扱うクラス
+ *  @details 名前、属性、子タグをメンバに持つ
+ *  
+ *  @date    2025/07/24 メンバを実装 (D: kawahara, N: shiba)
+ */
 class tag final
 {
 public:
@@ -72,10 +76,12 @@ private:
 };
 
 
-/// @brief	 XMLの属性を扱うクラス
-/// @details 名前、値をメンバに持つ
-/// 
-/// @date    2025/07/24 メンバを実装 (D: kawahara, N: shiba)
+/**
+ *	@brief	 XMLの属性を扱うクラス
+ *	@details 名前、値をメンバに持つ
+ *	
+ *	@date    2025/07/24 メンバを実装 (D: kawahara, N: shiba)
+ */
 class attribute final
 {
 public:
@@ -86,6 +92,50 @@ private:
 	std::string m_name;
 	std::string m_value;
 };
+
+
+namespace internal {
+
+
+/**
+ *	@brief	tokenの種類
+ *	@date	2025/07/24	作成 (D: shiba, N: kawahara)
+ */
+enum TokenType
+{
+	TT_TAG,			//	XMLタグを表す記号（<, >, /）
+	TT_EQUAL,		//	=
+	TT_LITERAL,		//	ダブルクオーテーションで囲われていない文字列
+	TT_VALUE,		//	ダブルクオーテーションで囲われた文字列
+	TT_EOF			//	末尾を表すトークン
+};
+
+
+/**
+ *	@brief	XMLをパースする際のトークン
+ *	@date	2025/07/24	作成 (D: shiba, N: kawahara)
+ */
+struct token
+{
+	TokenType type;
+	std::string value;
+	token* next;
+};
+
+
+/**
+ *	@brief		XMLをトークンに分割
+ *	@details	名前、値をメンバに持つ
+ *	
+ *	@param[in]	src		XMLのソース文字列
+ *	@param[in]	size	文字列のサイズ
+ *	@return		トークンの先頭ポインタ
+ *	@date		2025/07/24 プロトタイプ宣言 (D: shiba, N: kawahara)
+ */
+token* tokenize(const char* src, size_t size);
+
+
+}
 
 
 } // namespace zm32xml
