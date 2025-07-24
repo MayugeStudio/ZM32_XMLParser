@@ -5,7 +5,7 @@
 
 // Parsing                         :
 // 1. Attribute class members      : D: kawahara M: siba 2025/07/24 11:45 ~ 12:00
-// 2. Tag class members            :
+// 2. Tag class members            : D: kawahara M: siba 2025/07/24 12:30 ~ 13:00
 // 3. Document class members       :
 // 4. Introduce document.parse()   :
 // 4.1. Introduce tokenizer class  :
