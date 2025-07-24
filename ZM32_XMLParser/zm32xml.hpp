@@ -34,6 +34,7 @@
 
 namespace zm32xml {
 
+
 class document;
 class tag;
 class attribute;
@@ -54,6 +55,10 @@ private:
 };
 
 
+/// @brief	 XMLのタグを扱うクラス
+/// @details 名前、属性、子タグをメンバに持つ
+/// 
+/// @date    2025/07/24 メンバを実装 (D: kawahara, N: shiba)
 class tag final
 {
 public:
@@ -67,6 +72,10 @@ private:
 };
 
 
+/// @brief	 XMLの属性を扱うクラス
+/// @details 名前、値をメンバに持つ
+/// 
+/// @date    2025/07/24 メンバを実装 (D: kawahara, N: shiba)
 class attribute final
 {
 public:
