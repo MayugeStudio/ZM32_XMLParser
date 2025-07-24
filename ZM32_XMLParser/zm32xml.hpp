@@ -1,7 +1,10 @@
 #ifndef ZM32XML_HPP
 #define ZM32XML_HPP
 
+
 #include <string>
+#include <vector>
+
 
 // Parsing                         :
 // 1. Attribute class members      : D: kawahara M: siba 2025/07/24 11:45 ~ 12:00
@@ -15,13 +18,34 @@
 // 2. Tag interface methods        :
 // 3. Attribute interface methods  :
 
+
 namespace zm32xml {
-	class attribute {
-	public:
-	private:
-		std::string m_name;
-		std::string m_value;
-	};
-}
+
+
+class attribute
+{
+public:
+
+private:
+	std::string m_name;
+	std::string m_value;
+};
+
+
+class tag final
+{
+public:
+	tag() = default;
+	~tag() = default;
+
+private:
+	std::string m_name;
+	std::vector<attribute> m_attributes;
+	std::vector<tag> m_children;
+};
+
+
+} // namespace zm32xml
+
 
 #endif // ZM32XML_HPP
