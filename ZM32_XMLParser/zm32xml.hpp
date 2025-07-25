@@ -124,6 +124,19 @@ struct token
 
 
 /**
+ *	@brief	トークンを連鎖的に破棄する関数
+ *	@date	2025/07/25	作成 (D: shiba, N: kawahara)
+ */
+void delete_token(token* head)
+{
+	if (head->next) {
+		delete_token(head->next);
+	}
+	delete head;
+}
+
+
+/**
  *	@brief		XMLをトークンに分割
  *	@details	名前、値をメンバに持つ
  *	
