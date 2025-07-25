@@ -16,7 +16,7 @@
 // 2. Tag class members            : D: kawahara M: shiba 2025/07/24 12:30 ~ 13:00
 // 3. Document class members       : D: kawahara M: shiba 2025/07/24 12:40 ~ 13:00
 // 4. Introduce document.parse()   :
-// 4.1. Introduce tokenizer class  :
+// 4.1. Introduce tokenizer class  : D: shiba M: kawahara 2025/07/25 9:30 ~ 15:00
 // 4.2. Introduce parser    class  :
 // User interface                  :
 // 1. Document interface methods   :
