@@ -36,7 +36,7 @@ namespace zm32xml {
 
 
 class document;
-class tag;
+class element;
 class attribute;
 
 
@@ -53,7 +53,7 @@ public:
 	~document() = default;
 
 private:
-	tag root;
+	element root;
 };
 
 
@@ -63,16 +63,17 @@ private:
  *  
  *  @date    2025/07/24 メンバを実装 (D: kawahara, N: shiba)
  */
-class tag final
+class element final
 {
 public:
-	tag() = default;
-	~tag() = default;
+	element() = default;
+	~element() = default;
 
 private:
-	std::string m_name;
+	std::string m_tag_name;
+	std::string m_value;
 	std::vector<attribute> m_attributes;
-	std::vector<tag> m_children;
+	std::vector<element> m_children;
 };
 
 
