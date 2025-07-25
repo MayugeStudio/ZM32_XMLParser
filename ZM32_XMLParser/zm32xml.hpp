@@ -5,7 +5,8 @@
  *	
  *	@author		Kawahara, Shiba
  *	
- *	@date		2024/07/24
+ *	@date		2025/07/24
+ *	@date		2025/07/25	tokenizer作成
  *	
  *	@version	0.0.1
  */
@@ -17,17 +18,25 @@
 // 3. Document class members       : D: kawahara M: shiba 2025/07/24 12:40 ~ 13:00
 // 4. Introduce document.parse()   :
 // 4.1. Introduce tokenizer class  : D: shiba M: kawahara 2025/07/25 9:30 ~ 15:00
-// 4.2. Introduce parser    class  :
+// 4.2. Introduce parser    class  : D: shiba M: kawahara 2025/07/25 14:50 ~ 16:15
 // User interface                  :
 // 1. Document interface methods   :
 // 2. Tag interface methods        :
 // 3. Attribute interface methods  :
 
 
+//	TODO	2025/07/25
+//	
+//	parser::parse()を実装
+//	parserのデバッグ
+//	
+
+
 #ifndef ZM32XML_HPP
 #define ZM32XML_HPP
 
 
+#include <optional>
 #include <regex>
 #include <string>
 #include <vector>
@@ -49,6 +58,8 @@ public:
 	~attribute() = default;
 
 private:
+	friend class internal::parser;
+
 	std::string m_name;
 	std::string m_value;
 };
@@ -67,6 +78,8 @@ public:
 	~element() = default;
 
 private:
+	friend class internal::parser;
+
 	std::string m_tag_name;
 	std::string m_value;
 	std::vector<attribute> m_attributes;
@@ -87,6 +100,8 @@ public:
 	~document() = default;
 
 private:
+	friend class internal::parser;
+
 	element root;
 };
 
@@ -136,6 +151,11 @@ void free_token(token* head)
 }
 
 
+/**
+ *	@brief		XMLをトークンに分割するクラス
+ *
+ *	@date		2025/07/25	作成。tokenize関数、 advance関数、delete_token関数、regex_match_char_utf8関数作成 (D: shiba, N: kawahara)
+ */
 class tokenizer final
 {
 public:
@@ -147,7 +167,7 @@ public:
 	 *	@return		トークンの先頭ポインタ
 	 * 
 	 *	@date		2025/07/24	プロトタイプ宣言 (D: shiba, N: kawahara)
-	 *	@date		2025/07/25	編集中
+	 *	@date		2025/07/25	実装 (D: shiba, N: kawahara)
 	 */
 	token* tokenize(const char8_t* src, size_t size);
 
@@ -177,13 +197,13 @@ private:
 	void delete_token();
 
 	/**
- *	@brief		pが指す文字列の先頭文字が正規表現に一致するか判定
- *
- *	@param[in]	re	正規表現
- *	@return		一致したら文字のバイト数を返す。そうでなければ0を返す
- *
- *	@date		2025/07/25	作成 (D: shiba, N: kawahara)
- */
+	 *	@brief		pが指す文字列の先頭文字が正規表現に一致するか判定
+	 *
+	 *	@param[in]	re	正規表現
+	 *	@return		一致したら文字のバイト数を返す。そうでなければ0を返す
+	 *
+	 *	@date		2025/07/25	作成 (D: shiba, N: kawahara)
+	 */
 	size_t regex_match_char_utf8(std::regex re);
 	//size_t is_match_literal_start();
 	//size_t is_match_literal_start();
@@ -322,7 +342,7 @@ inline void tokenizer::delete_token()
 }
 
 
-size_t tokenizer::regex_match_char_utf8(std::regex re)
+inline size_t tokenizer::regex_match_char_utf8(std::regex re)
 {
 	std::string str;
 	const char8_t* c = p;
@@ -374,6 +394,157 @@ size_t tokenizer::regex_match_char_utf8(std::regex re)
 		return str.length();
 	}
 	return 0;
+}
+
+
+/**
+ *	@brief		XMLをパースするクラス
+ *
+ *	@date		2025/07/25	作成 (D: shiba, N: kawahara)
+ */
+class parser final
+{
+public:
+	/**
+	 *	@brief		XMLの文字列をパースする
+	 *
+	 *	@param[in]	src	
+	 *	@return		一致したら文字のバイト数を返す。そうでなければ0を返す
+	 *
+	 *	@date		2025/07/25	作成 (D: shiba, N: kawahara)
+	 */
+	std::optional<element> parse(const char8_t* src, size_t size);								//	<--	TODO
+
+private:
+	token* cur;
+
+
+	/**
+	 *	@brief		トークンからelementに再帰的にパースする
+	 *
+	 *	@return		パースしたelement
+	 *
+	 *	@date		2025/07/25	作成 (D: shiba, N: kawahara)
+	 */
+	std::optional<element> make_element();
+
+	token* advance();
+};
+
+
+inline std::optional<element> parser::make_element()
+{
+	if (!cur) {
+		return std::nullopt;
+	}
+
+	if (cur->type != TT_TAG_START_OPEN) {
+		return std::nullopt;
+	}
+
+	element elem;
+
+	if (!advance()) {
+		return std::nullopt;
+	}
+	if (cur->type != TT_LITERAL) {
+		return std::nullopt;
+	}
+	elem.m_tag_name = cur->value;
+	
+	if (!advance()) {
+		return std::nullopt;
+	}
+
+	//	タグのattributeをパース
+	while (cur->type != TT_EOF) {
+		if (cur->type == TT_TAG_END_EMPTY) {
+			return elem;
+		}
+		if (cur->type == TT_TAG_END) {
+			if (!advance()) {
+				return std::nullopt;
+			}
+			break;
+		}
+		if (cur->type == TT_LITERAL) {
+			attribute attr;
+			attr.m_name = cur->value;
+			if (!advance()) {
+				return std::nullopt;
+			}
+			if (cur->type != TT_EQUAL) {
+				return std::nullopt;
+			}
+			if (!advance()) {
+				return std::nullopt;
+			}
+			if (cur->type != TT_VALUE) {
+				return std::nullopt;
+			}
+			attr.m_value = cur->value;
+			if (!advance()) {
+				return std::nullopt;
+			}
+			elem.m_attributes.push_back(attr);
+		}
+	}
+
+	switch (cur->type) {
+	case TT_LITERAL:
+		elem.m_value += cur->value;
+		if (!advance()) {
+			return std::nullopt;
+		}
+		while (cur->type == TT_LITERAL)
+		{
+			elem.m_value += '\n' + cur->value;
+			if (!advance()) {
+				return std::nullopt;
+			}
+		}
+		if (cur->type != TT_TAG_START_CLOSE) {
+			return std::nullopt;
+		}
+
+		break;
+
+	case TT_TAG_START_OPEN:
+		while (cur->type == TT_TAG_START_OPEN) {
+			auto child = make_element();
+			if (!child) {
+				return std::nullopt;
+			}
+			elem.m_children.push_back(child.value());
+		}
+		if (cur->type != TT_TAG_START_CLOSE) {
+			return std::nullopt;
+		}
+
+		break;
+
+	case TT_TAG_START_CLOSE:
+		break;
+
+	default:
+		return std::nullopt;
+	}
+
+	advance();
+
+	return elem;
+}
+
+
+inline token* parser::advance()
+{
+	if (!cur) {
+		return nullptr;
+	}
+	token* prev = cur;
+	cur = cur->next;
+	delete prev;
+	return cur;
 }
 
 
