@@ -103,11 +103,14 @@ namespace internal {
  */
 enum TokenType
 {
-	TT_TAG,			//	XMLタグを表す記号（<, >, /）
-	TT_EQUAL,		//	=
-	TT_LITERAL,		//	ダブルクオーテーションで囲われていない文字列
-	TT_VALUE,		//	ダブルクオーテーションで囲われた文字列
-	TT_EOF			//	末尾を表すトークン
+	TT_TAG_START_OPEN,	//	開始タグの先頭を表す記号
+	TT_TAG_START_CLOSE,	//	終了タグの先頭を表す記号
+	TT_TAG_END,			//	タグの末尾を表す記号
+	TT_TAG_END_EMPTY,	//	空タグの末尾を表す記号
+	TT_EQUAL,			//	=
+	TT_LITERAL,			//	ダブルクオーテーションで囲われていない文字列
+	TT_VALUE,			//	ダブルクオーテーションで囲われた文字列
+	TT_EOF				//	末尾を表すトークン
 };
 
 
