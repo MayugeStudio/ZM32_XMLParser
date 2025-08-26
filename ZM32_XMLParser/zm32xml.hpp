@@ -63,8 +63,23 @@ class attribute final
 public:
 	attribute() = default;
 	~attribute() = default;
-	inline std::string name() { return m_name; }
-	inline std::string value() { return m_value; }
+	/**
+	*	@brief		名前のゲッター
+	* 
+	*	@return		名前
+	*
+	*	@date		2025/08/26	作成 (D: kawahara, N: shiba)
+	*/
+	inline std::string name() const { return m_name; }
+
+	/**
+	*	@brief		値のゲッター
+	*
+	*	@return		値
+	*
+	*	@date		2025/08/26	作成 (D: kawahara, N: shiba)
+	*/
+	inline std::string value() const { return m_value; }
 
 	static const attribute EMPTY;
 
