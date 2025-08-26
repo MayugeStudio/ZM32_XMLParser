@@ -104,19 +104,43 @@ private:
  *	@brief	 XML文書全体を扱うクラス
  *	@details ルートのtagを持つ
  *
- *	@date    2025/07/24 メンバを実装 (D: kawahara, N: shiba)
+ *	@date	2025/07/24	メンバを実装 (D: kawahara, N: shiba)
+ *	@data	2025/08/26	parseとchildを実装 (D: kawahara, N: shiba)
  */
 class document final
 {
 public:
 	document() = default;
 	~document() = default;
+	int parse(const char8_t* src, size_t size);
+	element child(const std::string& name);
 
 private:
 	friend class internal::parser;
 
 	element root;
 };
+
+
+inline int document::parse(const char8_t* xml_data, size_t size)
+{
+	zm32xml::internal::parser parser_instance;
+	auto result = parser_instance.parse(xml_data, size);
+	if (!result) {
+		return -1;
+	}
+	root = result.value();
+}
+
+
+inline element document::child(const std::string& name)
+{
+	if (root.tag_name() != name) {
+		return element{};
+	}
+
+	return root;
+}
 
 
 namespace internal {
