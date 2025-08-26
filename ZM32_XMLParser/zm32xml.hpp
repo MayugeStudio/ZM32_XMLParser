@@ -85,15 +85,16 @@ private:
  *  @brief	 XMLのタグを扱うクラス
  *  @details 名前、属性、子タグをメンバに持つ
  *  
- *  @date    2025/07/24 メンバを実装 (D: kawahara, N: shiba)
+ *  @date	2025/07/24 メンバを実装 (D: kawahara, N: shiba)
+ *  @data	2025/08/26 ゲッターを実装 (D: kawahara, N: shiba)
  */
 class element final
 {
 public:
 	element() = default;
 	~element() = default;
-	std::string tag_name();
-	std::string value();
+	inline std::string tag_name() { return m_tag_name; }
+	inline std::string value() { return m_value; }
 
 private:
 	friend class internal::parser;
