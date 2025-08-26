@@ -26,13 +26,6 @@
 // 3. Attribute interface methods  : D: kawahara M: shiba 2025/08/26 11:20 ~ 11:45
 
 
-//	TODO	2025/07/25
-//	
-//	parser::parse()を実装
-//	parserのデバッグ
-//	
-
-
 #ifndef ZM32XML_HPP
 #define ZM32XML_HPP
 
@@ -457,7 +450,7 @@ public:
 	 *
 	 *	@date		2025/07/25	作成 (D: shiba, N: kawahara)
 	 */
-	std::optional<element> parse(const char8_t* src, size_t size);								//	<--	TODO
+	std::optional<element> parse(const char8_t* src, size_t size);
 
 private:
 	token* cur;
