@@ -21,9 +21,9 @@
 // 4.1. Introduce tokenizer class  : D: shiba M: kawahara 2025/07/25 9:30 ~ 15:00
 // 4.2. Introduce parser    class  : D: shiba M: kawahara 2025/07/25 14:50 ~ 16:15
 // User interface                  :
-// 1. Document interface methods   :
-// 2. Tag interface methods        :
-// 3. Attribute interface methods  :
+// 1. Document interface methods   : D: kawahara M: shiba 2025/08/26 10:50 ~ 11:20
+// 2. Tag interface methods        : D: kawahara M: shiba 2025/08/26 11:45 ~ 
+// 3. Attribute interface methods  : D: kawahara M: shiba 2025/08/26 11:20 ~ 11:45
 
 
 //	TODO	2025/07/25
@@ -62,13 +62,16 @@ class parser;
  *	@brief	 XMLの属性を扱うクラス
  *	@details 名前、値をメンバに持つ
  *
- *	@date    2025/07/24 メンバを実装 (D: kawahara, N: shiba)
+ *	@date	2025/07/24 メンバを実装 (D: kawahara, N: shiba)
+ *  @date	2025/08/26 ゲッターを実装 (D: kawahara, N: shiba)
  */
 class attribute final
 {
 public:
 	attribute() = default;
 	~attribute() = default;
+	inline std::string name() { return m_name; }
+	inline std::string value() { return m_value; }
 
 private:
 	friend class internal::parser;
@@ -89,6 +92,8 @@ class element final
 public:
 	element() = default;
 	~element() = default;
+	std::string tag_name();
+	std::string value();
 
 private:
 	friend class internal::parser;
