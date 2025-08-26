@@ -31,6 +31,7 @@
 
 
 #include <optional>
+#include <ranges>
 #include <regex>
 #include <string>
 #include <vector>
@@ -97,15 +98,79 @@ inline const attribute attribute::EMPTY;
  *  @details 名前、属性、子タグをメンバに持つ
  *  
  *  @date	2025/07/24 メンバを実装 (D: kawahara, N: shiba)
- *  @data	2025/08/26 ゲッターを実装 (D: kawahara, N: shiba)
+ *  @data	2025/08/26 ゲッターを実装、使いやすくなるメソッドを実装 (D: kawahara, N: shiba)
  */
 class element final
 {
 public:
 	element() = default;
 	~element() = default;
-	inline std::string tag_name() { return m_tag_name; }
-	inline std::string value() { return m_value; }
+
+	/**
+	*	@brief		タグの名前のゲッター
+	*
+	*	@return		タグの名前
+	*
+	*	@date		2025/08/26	作成 (D: kawahara, N: shiba)
+	*/
+	inline std::string tag_name() const { return m_tag_name; }
+
+	/**
+	*	@brief		値のゲッター
+	*
+	*	@return		値
+	*
+	*	@date		2025/08/26	作成 (D: kawahara, N: shiba)
+	*/
+	inline std::string value() const { return m_value; }
+
+	/**
+	*	@brief		インスタンスが持つ、属性のベクターを返す
+	*
+	*	@return		属性のベクター
+	*
+	*	@date		2025/08/26	作成 (D: kawahara, N: shiba)
+	*/
+	const std::vector<attribute>& attributes() const;
+	
+	/**
+	*	@brief		インスタンスが持つ、エレメントのベクターを返す
+	*
+	*	@return		エレメントのベクター
+	*
+	*	@date		2025/08/26	作成 (D: kawahara, N: shiba)
+	*/
+	const std::vector<element>& children() const;
+	
+	/**
+	*	@brief		与えられた名前を持つエレメントのビューを返す
+	*
+	*	@param[in]	name	エレメントの名前
+	*	@return		指定された名前を持つエレメントまたは、空属性
+	*
+	*	@date		2025/08/26	作成 (D: kawahara, N: shiba)
+	*/
+	auto children(const std::string& name) const;
+
+	/**
+	*	@brief		与えられた名前を持つ最初の属性を返す
+	*
+	*	@param[in]	name	属性の名前
+	*	@return		指定された属性または、空属性
+	*
+	*	@date		2025/08/26	作成 (D: kawahara, N: shiba)
+	*/
+	const attribute& attribute(const std::string& name) const;
+
+	/**
+	*	@brief		与えられた名前を持つ最初のエレメントを返す
+	*
+	*	@param[in]	name	エレメントの名前
+	*	@return		指定されたエレメントまたは、空エレメント
+	*
+	*	@date		2025/08/26	作成 (D: kawahara, N: shiba)
+	*/
+	const element& child(const std::string& name) const;
 
 	static const element EMPTY;
 
@@ -114,11 +179,52 @@ private:
 
 	std::string m_tag_name;
 	std::string m_value;
-	std::vector<attribute> m_attributes;
+	std::vector<zm32xml::attribute> m_attributes;
 	std::vector<element> m_children;
 };
 
 inline const element element::EMPTY;
+
+
+const std::vector<attribute>& element::attributes() const
+{
+	return m_attributes;
+}
+
+
+const std::vector<element>& element::children() const
+{
+	return m_children;
+}
+
+
+auto element::children(const std::string& name) const
+{
+	return m_children | std::views::filter([name](element elem) {return elem.m_tag_name == name;});
+}
+
+
+const zm32xml::attribute& element::attribute(const std::string& name) const
+{
+	for (auto&& attr : m_attributes) {
+		if (attr.name() == name) {
+			return attr;
+		}
+	}
+	return attribute::EMPTY;
+}
+
+
+const element& element::child(const std::string& name) const
+{
+	for (auto&& elem : m_children) {
+		if (elem.tag_name() == name) {
+			return elem;
+		}
+	}
+	return EMPTY;
+}
+
 
 /**
  *	@brief	 XML文書全体を扱うクラス
