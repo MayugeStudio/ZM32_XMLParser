@@ -7,6 +7,7 @@
  *	
  *	@date		2025/07/24
  *	@date		2025/07/25	tokenizer作成
+ *	@date		2025/08/26	parser作成
  *	
  *	@version	0.0.1
  */
@@ -43,6 +44,18 @@
 
 
 namespace zm32xml {
+
+
+namespace internal {
+
+class tokenizer;
+class parser;
+
+} // namespace internal
+
+	//class attribute;
+	//class element;
+	//class document;
 
 
 /**
@@ -401,6 +414,7 @@ inline size_t tokenizer::regex_match_char_utf8(std::regex re)
  *	@brief		XMLをパースするクラス
  *
  *	@date		2025/07/25	作成 (D: shiba, N: kawahara)
+ *	@date		2025/08/26	parseメソッド実装 (D: shiba, N: kawahara)
  */
 class parser final
 {
@@ -432,6 +446,18 @@ private:
 };
 
 
+inline std::optional<element> parser::parse(const char8_t* src, size_t size)
+{
+	tokenizer tokenizer_instance;
+	cur = tokenizer_instance.tokenize(src, size);
+
+	std::optional<element> result = make_element();
+	free_token(cur);
+
+	return result;
+}
+
+
 inline std::optional<element> parser::make_element()
 {
 	if (!cur) {
@@ -459,6 +485,9 @@ inline std::optional<element> parser::make_element()
 	//	タグのattributeをパース
 	while (cur->type != TT_EOF) {
 		if (cur->type == TT_TAG_END_EMPTY) {
+			if (!advance()) {
+				return std::nullopt;
+			}
 			return elem;
 		}
 		if (cur->type == TT_TAG_END) {
@@ -503,9 +532,6 @@ inline std::optional<element> parser::make_element()
 				return std::nullopt;
 			}
 		}
-		if (cur->type != TT_TAG_START_CLOSE) {
-			return std::nullopt;
-		}
 
 		break;
 
@@ -517,20 +543,37 @@ inline std::optional<element> parser::make_element()
 			}
 			elem.m_children.push_back(child.value());
 		}
-		if (cur->type != TT_TAG_START_CLOSE) {
-			return std::nullopt;
-		}
 
-		break;
-
-	case TT_TAG_START_CLOSE:
 		break;
 
 	default:
 		return std::nullopt;
 	}
 
-	advance();
+	if (cur->type != TT_TAG_START_CLOSE) {
+		return std::nullopt;
+	}
+
+	if (!advance()) {
+		return std::nullopt;
+	}
+	if (cur->type != TT_LITERAL) {
+		return std::nullopt;
+	}
+	if (cur->value != elem.m_tag_name) {
+		return std::nullopt;
+	}
+
+	if (!advance()) {
+		return std::nullopt;
+	}
+	if (cur->type != TT_TAG_END) {
+		return std::nullopt;
+	}
+
+	if (!advance()) {
+		return std::nullopt;
+	}
 
 	return elem;
 }
