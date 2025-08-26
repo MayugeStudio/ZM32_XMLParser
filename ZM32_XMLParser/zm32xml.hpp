@@ -66,6 +66,8 @@ public:
 	inline std::string name() { return m_name; }
 	inline std::string value() { return m_value; }
 
+	static const attribute EMPTY;
+
 private:
 	friend class internal::parser;
 
@@ -73,6 +75,7 @@ private:
 	std::string m_value;
 };
 
+inline const attribute attribute::EMPTY;
 
 /**
  *  @brief	 XMLのタグを扱うクラス
@@ -89,6 +92,8 @@ public:
 	inline std::string tag_name() { return m_tag_name; }
 	inline std::string value() { return m_value; }
 
+	static const element EMPTY;
+
 private:
 	friend class internal::parser;
 
@@ -98,6 +103,7 @@ private:
 	std::vector<element> m_children;
 };
 
+inline const element element::EMPTY;
 
 /**
  *	@brief	 XML文書全体を扱うクラス
@@ -111,8 +117,26 @@ class document final
 public:
 	document() = default;
 	~document() = default;
+	/**
+	*	@brief		与えられたXMLの文字列をパースする
+	*
+	*	@param[in]	src		XMLのソース文字列
+	*	@param[in]	size	文字列のサイズ
+	*	@return		成功したら0、失敗したら1を返す
+	*
+	*	@date		2025/08/26	作成 (D: kawahara, N: shiba)
+	*/
 	int parse(const char8_t* src, size_t size);
-	element child(const std::string& name);
+
+	/**
+	*	@brief		ルートノードを返す
+	*
+	*	@param[in]	name	ルートノードの名前
+	*	@return		ルートノード
+	*
+	*	@date		2025/08/26	作成 (D: shiba, N: kawahara)
+	*/
+	const element& child(const std::string& name) const;
 
 private:
 	friend class internal::parser;
@@ -121,21 +145,10 @@ private:
 };
 
 
-inline int document::parse(const char8_t* xml_data, size_t size)
-{
-	zm32xml::internal::parser parser_instance;
-	auto result = parser_instance.parse(xml_data, size);
-	if (!result) {
-		return -1;
-	}
-	root = result.value();
-}
-
-
-inline element document::child(const std::string& name)
+inline const element& document::child(const std::string& name) const
 {
 	if (root.tag_name() != name) {
-		return element{};
+		return element::EMPTY;
 	}
 
 	return root;
@@ -615,6 +628,17 @@ inline token* parser::advance()
 
 
 } // namespace internal
+
+
+inline int document::parse(const char8_t* xml_data, size_t size)
+{
+	internal::parser parser_instance;
+	auto result = parser_instance.parse(xml_data, size);
+	if (!result) {
+		return -1;
+	}
+	root = result.value();
+}
 
 
 } // namespace zm32xml
