@@ -3,17 +3,46 @@
 #include "zm32xml.hpp"
 
 
+void display_xml(zm32xml::element parent, int indent)
+{
+	for (int i = 0;i < indent;++i) {
+		std::cout << " ";
+	}
+	//std::cout << "<" << parent.tag_name() << "> ";
+	std::cout << "<" << parent.tag_name();
+
+	int i = 0;
+	for (auto attr : parent.attributes()) {
+		//if (i == 0) {
+		//	std::cout << "[";
+		//}
+		//else {
+		//	std::cout << " ";
+		//}
+		//std::cout << attr.name() << "=" << attr.value();
+		//if (i == parent.attributes().size() - 1) {
+		//	std::cout << "] ";
+		//}
+		std::cout << " " << attr.name() << "=" << attr.value();
+		++i;
+	}
+
+	std::cout << "> " << parent.value();
+	std::cout << std::endl;
+
+	for (auto child : parent.children()) {
+		display_xml(child, indent + 2);
+	}
+}
+
+
 int main()
 {
-	char8_t xml_data[] = u8"<AA value1=\"hello\" value2=\"world\">\n\t<BB>\n<Lang value=\"C\"/>\n\t\t<Lang value=\"C++\"/>\n\t\t<Lang value=\"Python\"/>\n\t</BB>\n</AA>";
-
 	zm32xml::document doc;
-	int result = doc.parse(xml_data, sizeof(xml_data) / sizeof(char8_t));
-	if (!result) {
+	int result = doc.parse_file("testdata/test07.xml");
+	if (result) {
 		return -1;
 	}
 
-	for (auto&& lang : doc.child("AA").child("BB").children("Lang")) {
-		std::cout << lang.attribute("value").value() << std::endl;
-	}
+	display_xml(doc.root(), 0);
 }

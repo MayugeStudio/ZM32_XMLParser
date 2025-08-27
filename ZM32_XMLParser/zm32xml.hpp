@@ -22,18 +22,25 @@
 // 4.2. Introduce parser    class  : D: shiba M: kawahara 2025/07/25 14:50 ~ 16:15
 // User interface                  :
 // 1. Document interface methods   : D: kawahara M: shiba 2025/08/26 10:50 ~ 11:20
-// 2. Tag interface methods        : D: kawahara M: shiba 2025/08/26 11:45 ~ 
+// 2. Tag interface methods        : D: kawahara M: shiba 2025/08/26 11:45 ~ 14:50
 // 3. Attribute interface methods  : D: kawahara M: shiba 2025/08/26 11:20 ~ 11:45
+// 
+// TODO: 
+// - ツリー構造で表示
+// - ファイルから読み込み
+// - リファクタリング（できたら）
 
 
 #ifndef ZM32XML_HPP
 #define ZM32XML_HPP
 
 
+#include <fstream>
 #include <optional>
 #include <ranges>
 #include <regex>
 #include <string>
+#include <sstream>
 #include <vector>
 
 
@@ -247,7 +254,17 @@ public:
 	*
 	*	@date		2025/08/26	作成 (D: kawahara, N: shiba)
 	*/
-	int parse(const char8_t* src, size_t size);
+	int parse(const char* src, size_t size);
+
+	/**
+	*	@brief		与えられたXMLファイルをパースする
+	*
+	*	@param[in]	filepath	XMLファイルのパス
+	*	@return		成功したら0、失敗したら1を返す
+	*
+	*	@date		2025/08/26	作成 (D: kawahara, N: shiba)
+	*/
+	int parse_file(const char* filepath);
 
 	/**
 	*	@brief		ルートノードを返す
@@ -259,20 +276,29 @@ public:
 	*/
 	const element& child(const std::string& name) const;
 
+	/**
+	*	@brief		ルートノードを返す
+	*
+	*	@return		ルートノード
+	*
+	*	@date		2025/08/27	作成 (D: kawahara, N: shiba)
+	*/
+	inline const element& root() const { return m_root; }
+
 private:
 	friend class internal::parser;
 
-	element root;
+	element m_root;
 };
 
 
 inline const element& document::child(const std::string& name) const
 {
-	if (root.tag_name() != name) {
+	if (m_root.tag_name() != name) {
 		return element::EMPTY;
 	}
 
-	return root;
+	return m_root;
 }
 
 
@@ -292,6 +318,7 @@ enum TokenType
 	TT_EQUAL,			//	=
 	TT_LITERAL,			//	ダブルクオーテーションで囲われていない文字列
 	TT_VALUE,			//	ダブルクオーテーションで囲われた文字列
+	TT_SPACE,			//	空白文字
 	TT_EOF				//	末尾を表すトークン
 };
 
@@ -314,10 +341,12 @@ struct token
  */
 void free_token(token* head)
 {
-	if (head->next) {
-		free_token(head->next);
+	token* next;
+	while (head) {
+		next = head->next;
+		delete head;
+		head = next;
 	}
-	delete head;
 }
 
 
@@ -339,11 +368,11 @@ public:
 	 *	@date		2025/07/24	プロトタイプ宣言 (D: shiba, N: kawahara)
 	 *	@date		2025/07/25	実装 (D: shiba, N: kawahara)
 	 */
-	token* tokenize(const char8_t* src, size_t size);
+	token* tokenize(const char* src, size_t size);
 
 private:
-	const char8_t* p;
-	const char8_t* end;
+	const char* p;
+	const char* end;
 	token head;
 	token* cur;
 	bool is_eof;
@@ -380,7 +409,7 @@ private:
 };
 
 
-inline token* tokenizer::tokenize(const char8_t* src, size_t size)
+inline token* tokenizer::tokenize(const char* src, size_t size)
 {
 	p = src;
 	end = src + size - 1u;
@@ -390,9 +419,18 @@ inline token* tokenizer::tokenize(const char8_t* src, size_t size)
 
 	while (!is_eof)
 	{
-		if (regex_match_char_utf8(std::regex{ "[\x20\x9\xD\xA]" })) {
-			advance();
-			continue;
+		{
+			std::string buf;
+			size_t byte;
+			if (byte = regex_match_char_utf8(std::regex{ "[\x20\x9\xD\xA]" })) {
+				for (size_t i = 0; i < byte; ++i) {
+					buf += *p;
+					advance();
+				}
+				cur->next = new token{ TT_SPACE, buf, nullptr };
+				cur = cur->next;
+				continue;
+			}
 		}
 
 		if (*p == u8'<') {
@@ -440,7 +478,7 @@ inline token* tokenizer::tokenize(const char8_t* src, size_t size)
 		}
 
 		if (*p == u8'\'' || *p == u8'"') {
-			char8_t q = *p;
+			char q = *p;
 			std::string buf;
 			while (advance() != 0 && *p != q)
 			{
@@ -457,10 +495,10 @@ inline token* tokenizer::tokenize(const char8_t* src, size_t size)
 			continue;
 		}
 
-		if (regex_match_char_utf8(std::regex{ "[:A-Z_a-z]" })) {
+		if (regex_match_char_utf8(std::regex{ "[:0-9A-Z_a-z\(\)&]" })) {
 			std::string buf;
 			size_t byte;
-			while (byte = regex_match_char_utf8(std::regex{ "[-.:0-9A-Z_a-z]" })) {
+			while (byte = regex_match_char_utf8(std::regex{ "[-.:0-9A-Z_a-z@/\(\)&;]" })) {
 				for (size_t i = 0; i < byte; ++i) {
 					buf += *p;
 					advance();
@@ -515,7 +553,7 @@ inline void tokenizer::delete_token()
 inline size_t tokenizer::regex_match_char_utf8(std::regex re)
 {
 	std::string str;
-	const char8_t* c = p;
+	const char* c = p;
 
 	if ((*c & 0x80) == 0x00) {
 		str += *c;
@@ -584,7 +622,7 @@ public:
 	 *
 	 *	@date		2025/07/25	作成 (D: shiba, N: kawahara)
 	 */
-	std::optional<element> parse(const char8_t* src, size_t size);
+	std::optional<element> parse(const char* src, size_t size);
 
 private:
 	token* cur;
@@ -599,17 +637,19 @@ private:
 	 */
 	std::optional<element> make_element();
 
-	token* advance();
+	token* advance(bool ignore_space = true);
 };
 
 
-inline std::optional<element> parser::parse(const char8_t* src, size_t size)
+inline std::optional<element> parser::parse(const char* src, size_t size)
 {
 	tokenizer tokenizer_instance;
 	cur = tokenizer_instance.tokenize(src, size);
 
 	std::optional<element> result = make_element();
-	free_token(cur);
+	if (cur) {
+		free_token(cur);
+	}
 
 	return result;
 }
@@ -619,6 +659,10 @@ inline std::optional<element> parser::make_element()
 {
 	if (!cur) {
 		return std::nullopt;
+	}
+
+	if (cur->type == TT_SPACE) {
+		advance();
 	}
 
 	if (cur->type != TT_TAG_START_OPEN) {
@@ -678,19 +722,26 @@ inline std::optional<element> parser::make_element()
 
 	switch (cur->type) {
 	case TT_LITERAL:
+	{
 		elem.m_value += cur->value;
-		if (!advance()) {
+		if (!advance(false)) {
 			return std::nullopt;
 		}
-		while (cur->type == TT_LITERAL)
+		std::string buf;
+		while (cur->type == TT_LITERAL || cur->type == TT_SPACE)
 		{
-			elem.m_value += '\n' + cur->value;
-			if (!advance()) {
+			buf += cur->value;
+			if (cur->type == TT_LITERAL) {
+				elem.m_value += buf;
+				buf.clear();
+			}
+			if (!advance(false)) {
 				return std::nullopt;
 			}
 		}
 
 		break;
+	}
 
 	case TT_TAG_START_OPEN:
 		while (cur->type == TT_TAG_START_OPEN) {
@@ -736,14 +787,16 @@ inline std::optional<element> parser::make_element()
 }
 
 
-inline token* parser::advance()
+inline token* parser::advance(bool ignore_space)
 {
-	if (!cur) {
-		return nullptr;
-	}
-	token* prev = cur;
-	cur = cur->next;
-	delete prev;
+	do {
+		if (!cur) {
+			return nullptr;
+		}
+		token* prev = cur;
+		cur = cur->next;
+		delete prev;
+	} while (ignore_space && cur && cur->type == TT_SPACE);
 	return cur;
 }
 
@@ -751,14 +804,28 @@ inline token* parser::advance()
 } // namespace internal
 
 
-inline int document::parse(const char8_t* xml_data, size_t size)
+inline int document::parse(const char* xml_data, size_t size)
 {
 	internal::parser parser_instance;
 	auto result = parser_instance.parse(xml_data, size);
 	if (!result) {
 		return -1;
 	}
-	root = result.value();
+	m_root = result.value();
+	return 0;
+}
+
+inline int document::parse_file(const char* filepath)
+{
+	std::ifstream ifs{ filepath };
+	if (!ifs) {
+		return -1;
+	}
+	
+	std::stringstream buffer;
+	buffer << ifs.rdbuf();
+	ifs.close();
+	return parse(buffer.str().c_str(), buffer.str().size());
 }
 
 
