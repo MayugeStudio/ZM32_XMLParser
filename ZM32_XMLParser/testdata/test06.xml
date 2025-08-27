@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<employees xmlns="https://www.example.com/employee-schema">
+
+  <employee id="101">
+    <personalInfo>
+      <lastName>Smith</lastName>
+      <firstName>John</firstName>
+      <hireDate>2018-04-01</hireDate>
+    </personalInfo>
+    <position>
+      <department>Development Department</department>
+      <title>Software Engineer</title>
+      <managerId>205</managerId>
+    </position>
+    <contact>
+      <email>john.smith@example.com</email>
+      <phone type="mobile">090-1234-5678</phone>
+    </contact>
+    <skills>
+      <skill proficiency="5">Java</skill>
+      <skill proficiency="4">Spring Boot</skill>
+      <skill proficiency="3">AWS</skill>
+    </skills>
+    <projects>
+      <project>
+        <projectId>PJ-001</projectId>
+        <projectName>Customer Management System Renewal</projectName>
+        <role>Backend Lead</role>
+      </project>
+      <project>
+        <projectId>PJ-008</projectId>
+        <projectName>New Payment Service Integration</projectName>
+        <role>API Design</role>
+      </project>
+    </projects>
+  </employee>
+
+  <employee id="102">
+    <personalInfo>
+      <lastName>Davis</lastName>
+      <firstName>Emily</firstName>
+      <hireDate>2020-04-01</hireDate>
+    </personalInfo>
+    <position>
+      <department>Design Department</department>
+      <title>UI/UX Designer</title>
+      <managerId>301</managerId>
+    </position>
+    <contact>
+      <email>emily.davis@example.com</email>
+      <phone type="mobile">080-8765-4321</phone>
+      <phone type="office">03-5555-4321</phone>
+    </contact>
+    <skills>
+      <skill proficiency="5">Figma</skill>
+      <skill proficiency="5">Adobe XD</skill>
+      <skill proficiency="3">HTML/CSS</skill>
+    </skills>
+    <projects>
+      <project>
+        <projectId>PJ-005</projectId>
+        <projectName>Corporate Website Redesign</projectName>
+        <role>Lead Designer</role>
+      </project>
+    </projects>
+  </employee>
+
+  <employee id="205">
+    <personalInfo>
+      <lastName>Wilson</lastName>
+      <firstName>Michael</firstName>
+      <hireDate>2015-10-01</hireDate>
+    </personalInfo>
+    <position>
+      <department>Development Department</department>
+      <title>Engineering Manager</title>
+      <managerId>901</managerId>
+    </position>
+    <contact>
+      <email>michael.wilson@example.com</email>
+      <phone type="office">03-1111-2222</phone>
+    </contact>
+    <skills>
+      <skill proficiency="5">Project Management</skill>
+      <skill proficiency="4">Python</skill>
+      <skill proficiency="4">System Architecture</skill>
+    </skills>
+    <projects>
+      <project>
+        <projectId>PJ-001</projectId>
+        <projectName>Customer Management System Renewal</projectName>
+        <role>Project Manager</role>
+      </project>
+    </projects>
+  </employee>
+
+</employees>
