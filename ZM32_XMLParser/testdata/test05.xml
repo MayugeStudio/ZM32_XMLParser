@@ -1,0 +1,17 @@
+<Programming value1="hello" value2="world">
+    <Languages>
+      <Language value="C"/>
+      <Language value="C++"/>
+      <Language value="Python"/>
+    </Languages>
+    <Tools>
+      <Tool value="VisualStudio"/>
+      <Tool value="VisualStudioCode"/>
+      <Tool value="JetBrains"/>
+      <Tool value="Emacs"/>
+      <Tool value="Vim"/>
+    </Tools>
+    <MyOpinion>
+      I like C and Vim.
+    </MyOpinion>
+</Programming>
